@@ -1,24 +1,35 @@
-// ====== 1) 活动配置（改这里就行） ======
-const ACTIVITY_ID = "cny-restaurant-2026"; // 换成你餐厅/活动唯一ID
+// ====== 1) Activity config ======
+const ACTIVITY_ID = "cny-restaurant-2026";
 const STORAGE_KEY = `wheel_spin_${ACTIVITY_ID}`;
 
-// 你的奖品（name + weight）
+// ✅ PRIZES: add lines for clear multi-line labels on wheel
 const PRIZES = [
-  { name: "One FREE Mango Pomelo Sago", weight: 10 },
-  { name: "One FREE soft drink", weight: 15 },
-  { name: "FREE CNY sweet rice cake", weight: 60 },
-  // 你可以继续加：{ name: "谢谢参与", weight: 200 }
+  {
+    name: "One FREE Mango Pomelo Sago",
+    lines: ["One FREE", "Mango", "Pomelo", "Sago"],
+    weight: 10,
+  },
+  {
+    name: "One FREE soft drink",
+    lines: ["One FREE", "soft", "drink"],
+    weight: 15,
+  },
+  {
+    name: "FREE CNY sweet rice cake",
+    lines: ["FREE CNY", "sweet", "rice cake"],
+    weight: 60,
+  },
 ];
 
-// 扇区配色（春节红金系）
+// Slice colors
 const SLICE_COLORS = [
-  ["#b40000", "#7a0000"], // red
-  ["#f5d36a", "#d8b04f"], // gold
-  ["#8a0000", "#5a0000"], // deep red
-  ["#ffefb3", "#f5d36a"], // light gold
+  ["#b40000", "#7a0000"],
+  ["#f5d36a", "#d8b04f"],
+  ["#8a0000", "#5a0000"],
+  ["#ffefb3", "#f5d36a"],
 ];
 
-// ====== 2) 工具函数 ======
+// ====== 2) Utils ======
 function weightedPickIndex(items) {
   const total = items.reduce((s, it) => s + it.weight, 0);
   let r = Math.random() * total;
@@ -46,11 +57,12 @@ function makeShortId() {
   return `CNY-${s}`;
 }
 
-// ====== 3) 画转盘（Canvas） ======
+// ====== 3) Canvas wheel ======
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
+
 const spinBtn = document.getElementById("spinBtn");
-const resetBtn = document.getElementById("resetBtn");
+const resetBtn = document.getElementById("resetBtn"); // may be removed in prod
 
 const resultBox = document.getElementById("resultBox");
 const resultPrize = document.getElementById("resultPrize");
@@ -63,7 +75,7 @@ const cx = W / 2;
 const cy = H / 2;
 const radius = Math.min(W, H) / 2 - 10;
 
-let currentAngle = 0; // radians
+let currentAngle = 0;
 let spinning = false;
 
 function drawWheel(angleRad) {
@@ -107,76 +119,41 @@ function drawWheel(angleRad) {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // prize text
-    // ===== prize text (robust layout for English) =====
-ctx.save();
-ctx.rotate(start + slice / 2);
+    // ===== prize text: manual multi-line (clear like your screenshot) =====
+    ctx.save();
+    ctx.rotate(start + slice / 2);
 
-// English looks better centered
-ctx.textAlign = "center";
-ctx.textBaseline = "middle";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
-// colors
-ctx.fillStyle = i % 2 === 1 ? "#5a0000" : "rgba(255,239,179,0.95)";
+    // contrast: gold slice uses deep text; red slice uses light text
+    const isGoldish = (i % 2 === 1); // depends on your color order; adjust if needed
+    ctx.fillStyle = isGoldish ? "#5a0000" : "rgba(255,255,255,0.92)";
 
-// Position: pull inward to avoid overflow
-const textR = radius * 0.62;
+    const lines =
+      Array.isArray(PRIZES[i].lines) && PRIZES[i].lines.length
+        ? PRIZES[i].lines
+        : [PRIZES[i].name];
 
-// Max text width should depend on slice angle (approx chord length)
-const maxWidth = Math.min(
-  radius * 0.95,                 // hard cap
-  (radius * 0.85) * Math.sin(slice / 2) * 2 // chord length at this radius
-);
+    // position: keep away from center hub, and away from edge
+    const textR = radius * 0.72;
 
-// Word-wrap by measuring actual width
-function wrapLines(text, fontSize) {
-  ctx.font = `800 ${fontSize}px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial`;
-  const words = text.split(/\s+/).filter(Boolean);
-  const lines = [];
-  let line = "";
+    // font size based on line count
+    let fontSize = 20;
+    if (lines.length === 3) fontSize = 18;
+    if (lines.length === 4) fontSize = 16;
+    if (lines.length >= 5) fontSize = 14;
 
-  for (const w of words) {
-    const test = line ? `${line} ${w}` : w;
-    if (ctx.measureText(test).width <= maxWidth) {
-      line = test;
-    } else {
-      if (line) lines.push(line);
-      line = w;
+    ctx.font = `900 ${fontSize}px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial`;
+
+    const lineHeight = Math.round(fontSize * 1.18);
+    const y0 = -((lines.length - 1) / 2) * lineHeight;
+
+    for (let li = 0; li < lines.length; li++) {
+      ctx.fillText(lines[li], textR, y0 + li * lineHeight);
     }
-  }
-  if (line) lines.push(line);
-  return lines;
-}
 
-// Auto-shrink font if needed
-let fontSize = 18;
-let lines = wrapLines(PRIZES[i].name, fontSize);
-
-// If too many lines or still wide: shrink down
-while ((lines.length > 3) && fontSize > 14) {
-  fontSize -= 1;
-  lines = wrapLines(PRIZES[i].name, fontSize);
-}
-
-// If any line still exceeds maxWidth, shrink further
-function longestWidth(ls) {
-  return Math.max(...ls.map(l => ctx.measureText(l).width));
-}
-while (longestWidth(lines) > maxWidth && fontSize > 12) {
-  fontSize -= 1;
-  lines = wrapLines(PRIZES[i].name, fontSize);
-}
-
-// Render lines centered vertically
-const lineHeight = Math.round(fontSize * 1.15);
-const y0 = -((lines.length - 1) / 2) * lineHeight;
-
-for (let li = 0; li < lines.length; li++) {
-  ctx.fillText(lines[li], textR, y0 + li * lineHeight);
-}
-
-ctx.restore();
-
+    ctx.restore();
   }
 
   ctx.restore();
@@ -192,23 +169,21 @@ ctx.restore();
   }
 }
 
-// ====== 4) 旋转动画（真实缓动） ======
+// ====== 4) Spin animation ======
 function easeOutCubic(t) {
   return 1 - Math.pow(1 - t, 3);
 }
 
-// 指针固定在顶部（12点方向）
 const TWO_PI = Math.PI * 2;
-const POINTER_ANGLE = -Math.PI / 2;
+const POINTER_ANGLE = -Math.PI / 2; // pointer at 12 o'clock
 
-// 计算“让某个扇区中心对齐指针”的角度（用于刷新后复原轮盘）
 function alignedAngleForIndex(winIndex) {
   const n = PRIZES.length;
   const slice = TWO_PI / n;
   const targetCenter = winIndex * slice + slice / 2;
 
   let ang = POINTER_ANGLE - targetCenter;
-  ang = ((ang % TWO_PI) + TWO_PI) % TWO_PI; // normalize
+  ang = ((ang % TWO_PI) + TWO_PI) % TWO_PI;
   return ang;
 }
 
@@ -219,7 +194,7 @@ function spinToIndex(winIndex) {
   const targetCenter = winIndex * slice + slice / 2;
   const base = POINTER_ANGLE - targetCenter;
 
-  // 强制顺时针
+  // force clockwise & forward
   let finalAngle = base;
   while (finalAngle <= currentAngle) finalAngle += TWO_PI;
 
@@ -242,11 +217,10 @@ function spinToIndex(winIndex) {
     currentAngle = startAngle + delta * eased;
     drawWheel(currentAngle);
 
-    if (t < 1) {
-      requestAnimationFrame(frame);
-    } else {
+    if (t < 1) requestAnimationFrame(frame);
+    else {
       spinning = false;
-      spinBtn.disabled = true; // 一次性
+      spinBtn.disabled = true; // one-time
       onWin(winIndex);
     }
   }
@@ -254,9 +228,9 @@ function spinToIndex(winIndex) {
   requestAnimationFrame(frame);
 }
 
-// ====== 4.5) Win FX: simple fireworks (safe even if #fx not added yet) ======
+// ====== 4.5) Win FX fireworks (safe if #fx missing) ======
 const panelEl = document.querySelector(".panel");
-const fxCanvas = document.getElementById("fx"); // 你待会在 HTML 加这个 canvas
+const fxCanvas = document.getElementById("fx");
 const fxCtx = fxCanvas ? fxCanvas.getContext("2d") : null;
 
 function resizeFxCanvas() {
@@ -268,21 +242,16 @@ function resizeFxCanvas() {
   fxCanvas.height = Math.floor(r.height * dpr);
   fxCanvas.style.width = `${r.width}px`;
   fxCanvas.style.height = `${r.height}px`;
-
   fxCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
-window.addEventListener("resize", () => {
-  // 只有当你加了 #fx 才会执行有效
-  resizeFxCanvas();
-});
+window.addEventListener("resize", resizeFxCanvas);
 
 function rand(min, max) {
   return Math.random() * (max - min) + min;
 }
 
 function fireworkBurst(x, y, count = 90) {
-  // ✅ 容错：你还没加 HTML/CSS 时不会报错
   if (!fxCtx || !fxCanvas || !panelEl) return;
 
   resizeFxCanvas();
@@ -297,14 +266,14 @@ function fireworkBurst(x, y, count = 90) {
     const a = rand(0, Math.PI * 2);
     const sp = rand(2.2, 6.2);
     particles.push({
-      x, y,
+      x,
+      y,
       vx: Math.cos(a) * sp,
       vy: Math.sin(a) * sp,
       r: rand(1.2, 2.6),
       life: Math.floor(rand(40, lifeMax)),
-      // 金/红更春节
       hue: Math.random() < 0.65 ? rand(38, 55) : rand(0, 12),
-      alpha: 1
+      alpha: 1,
     });
   }
 
@@ -312,7 +281,6 @@ function fireworkBurst(x, y, count = 90) {
   function tick() {
     frame++;
     fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
-
     fxCtx.globalCompositeOperation = "lighter";
 
     for (const p of particles) {
@@ -333,14 +301,12 @@ function fireworkBurst(x, y, count = 90) {
 
     fxCtx.globalCompositeOperation = "source-over";
 
-    // remove dead
     for (let i = particles.length - 1; i >= 0; i--) {
       if (particles[i].life <= 0) particles.splice(i, 1);
     }
 
-    if (particles.length > 0 && frame < 120) {
-      requestAnimationFrame(tick);
-    } else {
+    if (particles.length > 0 && frame < 120) requestAnimationFrame(tick);
+    else {
       fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
       panelEl.classList.remove("fx-on");
     }
@@ -349,7 +315,7 @@ function fireworkBurst(x, y, count = 90) {
   requestAnimationFrame(tick);
 }
 
-// ====== 5) 一次性限制 + 结果展示 ======
+// ====== 5) One-time spin + result ======
 function loadSpinState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -372,17 +338,14 @@ function showResult(prize, time, id) {
 
 function lockIfAlreadySpun() {
   const state = loadSpinState();
-
   if (state && state.prize) {
     spinBtn.disabled = true;
 
-    let idx = Number.isInteger(state.winIndex)
+    const idx = Number.isInteger(state.winIndex)
       ? state.winIndex
       : PRIZES.findIndex((p) => p.name === state.prize);
 
-    if (idx >= 0) {
-      currentAngle = alignedAngleForIndex(idx);
-    }
+    if (idx >= 0) currentAngle = alignedAngleForIndex(idx);
     drawWheel(currentAngle);
 
     showResult(state.prize, state.time, state.id);
@@ -397,19 +360,24 @@ function onWin(winIndex) {
   const time = nowStamp();
   const id = makeShortId();
 
-  // 保存 winIndex：刷新后轮盘与结果一致
-  const state = { prize, time, id, winIndex };
-  saveSpinState(state);
+  // save winIndex so refresh keeps wheel aligned
+  saveSpinState({ prize, time, id, winIndex });
 
   showResult(prize, time, id);
 
-  // 🔥 烟花：位置在 panel 的上方偏中间，像在轮盘上方炸开
-  // 你待会加了 HTML 的 <canvas id="fx"> + CSS 后就会显示
+  // optional win glow if CSS has it
+  if (panelEl) {
+    panelEl.classList.add("win-glow");
+    setTimeout(() => panelEl.classList.remove("win-glow"), 1000);
+  }
+
+  // fireworks near top of wheel
   if (panelEl) {
     fireworkBurst(panelEl.clientWidth * 0.5, panelEl.clientHeight * 0.30, 95);
   }
 }
 
+// Events
 spinBtn.addEventListener("click", () => {
   if (spinning) return;
 
@@ -424,7 +392,8 @@ spinBtn.addEventListener("click", () => {
   spinToIndex(winIndex);
 });
 
-resetBtn.addEventListener("click", () => {
+// Reset (only if button exists)
+resetBtn?.addEventListener("click", () => {
   localStorage.removeItem(STORAGE_KEY);
   resultBox.hidden = true;
   spinBtn.disabled = false;
@@ -432,18 +401,13 @@ resetBtn.addEventListener("click", () => {
   currentAngle = 0;
   drawWheel(currentAngle);
 
-  // 如果有特效层，顺便清空
-  if (fxCtx && fxCanvas) {
-    fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
-  }
-  if (panelEl) panelEl.classList.remove("fx-on");
+  if (fxCtx && fxCanvas) fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+  panelEl?.classList.remove("fx-on");
 });
 
-const DEV_MODE = True;
+// Hide reset in production
+const DEV_MODE = false;
+if (!DEV_MODE) document.getElementById("resetBtn")?.remove();
 
-if (!DEV_MODE) {
-  document.getElementById("resetBtn")?.remove();
-}
-
-// 初始化
+// Init
 lockIfAlreadySpun();

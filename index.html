@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#7a0000" />
   <title>CNY QR Lucky Spin · Prize Wheel</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-  <div class="bg"></div>
+  <div class="bg" aria-hidden="true"></div>
 
   <main class="wrap">
     <!-- Lantern decorations -->
@@ -17,12 +18,12 @@
 
     <header class="top">
       <div class="badge">🧧 CNY LUCKY SPIN</div>
-      <h1>Scan & Spin for CNY Rewards</h1>
+      <h1>Scan &amp; Spin for CNY Rewards</h1>
       <p class="sub">One spin per table · Please show your result for staff redemption</p>
     </header>
 
-    <section class="panel">
-      <!-- ✅ Win FX canvas (required for fireworks) -->
+    <section class="panel" aria-label="Lucky spin panel">
+      <!-- ✅ Win FX canvas (used by app.js; safe if CSS supports .fx) -->
       <canvas id="fx" class="fx" aria-hidden="true"></canvas>
 
       <div class="wheel-area">
@@ -35,8 +36,10 @@
       </div>
 
       <div class="actions">
-        <button id="spinBtn" class="btn">Spin Now</button>
-        <button id="resetBtn" class="btn ghost" title="For testing only. Hide for the real event.">Reset (Test)</button>
+        <button id="spinBtn" class="btn" type="button">Spin Now</button>
+        <button id="resetBtn" class="btn ghost" type="button" title="For testing only. Hide for the real event.">
+          Reset (Test)
+        </button>
       </div>
 
       <div class="result" id="resultBox" hidden>
