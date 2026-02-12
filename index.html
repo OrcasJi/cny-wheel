@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>春节扫码抽奖 · 幸运转盘</title>
+  <title>CNY QR Lucky Spin · Prize Wheel</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -11,52 +11,59 @@
   <div class="bg"></div>
 
   <main class="wrap">
+    <!-- Lantern decorations -->
+    <div class="lantern lantern-left" aria-hidden="true"></div>
+    <div class="lantern lantern-right" aria-hidden="true"></div>
+
     <header class="top">
       <div class="badge">🧧 CNY LUCKY SPIN</div>
-      <h1>春节扫码抽奖</h1>
-      <p class="sub">每人限抽 1 次 · 抽中后请截图给店员核销</p>
+      <h1>Scan & Spin for CNY Rewards</h1>
+      <p class="sub">One spin per person · Please screenshot your result for staff redemption</p>
     </header>
 
     <section class="panel">
+      <!-- ✅ Win FX canvas (required for fireworks) -->
+      <canvas id="fx" class="fx" aria-hidden="true"></canvas>
+
       <div class="wheel-area">
         <div class="pointer" aria-hidden="true"></div>
 
         <div class="wheel-shell">
-          <canvas id="wheel" width="520" height="520" aria-label="Lucky wheel"></canvas>
-          <div class="hub">福</div>
+          <canvas id="wheel" width="520" height="520" aria-label="Lucky prize wheel"></canvas>
+          <div class="hub" aria-label="Good fortune">福</div>
         </div>
       </div>
 
       <div class="actions">
-        <button id="spinBtn" class="btn">开始抽奖</button>
-        <button id="resetBtn" class="btn ghost" title="仅测试用，正式活动请隐藏">重置（测试）</button>
+        <button id="spinBtn" class="btn">Spin Now</button>
+        <button id="resetBtn" class="btn ghost" title="For testing only. Hide for the real event.">Reset (Test)</button>
       </div>
 
       <div class="result" id="resultBox" hidden>
-        <div class="result-title">🎉 恭喜你抽中</div>
+        <div class="result-title">🎉 You won</div>
         <div class="result-prize" id="resultPrize">—</div>
         <div class="result-meta">
           <span id="resultTime">—</span>
           <span class="dot">•</span>
           <span id="resultId">—</span>
         </div>
-        <div class="result-tip">请将本页面截图出示给店员</div>
+        <div class="result-tip">Please screenshot this page and show it to staff</div>
       </div>
 
       <div class="rules">
         <details>
-          <summary>活动规则</summary>
+          <summary>Rules</summary>
           <ul>
-            <li>每台设备/浏览器默认限抽 1 次（清除浏览器数据可能绕过）。</li>
-            <li>奖品以页面显示为准，请当场出示截图给店员。</li>
-            <li>如遇异常，以店内解释为准。</li>
+            <li>One spin per device/browser (clearing browser data may bypass this).</li>
+            <li>Prizes are based on the result shown on this page after spinning.</li>
+            <li>If anything looks wrong, staff decision is final.</li>
           </ul>
         </details>
       </div>
     </section>
 
     <footer class="foot">
-      <span>祝你新年好运 🧨</span>
+      <span>Happy Lunar New Year 🧨</span>
     </footer>
   </main>
 
