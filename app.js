@@ -136,17 +136,17 @@ function drawWheel(angleRad) {
         : [PRIZES[i].name];
 
     // position: keep away from center hub, and away from edge
-    const textR = radius * 0.72;
+    const textR = radius * 0.55;
 
     // font size based on line count
-    let fontSize = 20;
-    if (lines.length === 3) fontSize = 18;
-    if (lines.length === 4) fontSize = 16;
-    if (lines.length >= 5) fontSize = 14;
+    let fontSize = 26;
+    if (lines.length === 3) fontSize = 20;
+    if (lines.length === 4) fontSize = 18;
+    if (lines.length >= 5) fontSize = 16;
 
     ctx.font = `900 ${fontSize}px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial`;
 
-    const lineHeight = Math.round(fontSize * 1.18);
+    const lineHeight = Math.round(fontSize * 1.22);
     const y0 = -((lines.length - 1) / 2) * lineHeight;
 
     for (let li = 0; li < lines.length; li++) {
@@ -264,13 +264,13 @@ function fireworkBurst(x, y, count = 90) {
 
   for (let i = 0; i < count; i++) {
     const a = rand(0, Math.PI * 2);
-    const sp = rand(2.2, 6.2);
+    const sp = rand(3.0, 9.0);
     particles.push({
       x,
       y,
       vx: Math.cos(a) * sp,
       vy: Math.sin(a) * sp,
-      r: rand(1.2, 2.6),
+      r: rand(1.6, 3.4),
       life: Math.floor(rand(40, lifeMax)),
       hue: Math.random() < 0.65 ? rand(38, 55) : rand(0, 12),
       alpha: 1,
@@ -364,7 +364,7 @@ function onWin(winIndex) {
   saveSpinState({ prize, time, id, winIndex });
 
   showResult(prize, time, id);
-
+  
   // optional win glow if CSS has it
   if (panelEl) {
     panelEl.classList.add("win-glow");
