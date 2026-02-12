@@ -361,5 +361,14 @@ h1{
 
 /* Small screens: hide lanterns */
 @media (max-width: 720px){
-  .lantern{ display:none; }
+  .lantern{
+    width:52px;
+    height:76px;
+    top:80px;
+    animation: lanternSwing 4.2s ease-in-out infinite;
+  }
+
+  .lantern-left{ left: 8px; }
+  .lantern-right{ right: 8px; }
 }
+

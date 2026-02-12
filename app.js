@@ -108,31 +108,75 @@ function drawWheel(angleRad) {
     ctx.stroke();
 
     // prize text
-    ctx.save();
-    ctx.rotate(start + slice / 2);
+    // ===== prize text (robust layout for English) =====
+ctx.save();
+ctx.rotate(start + slice / 2);
 
-    ctx.textAlign = "right";
-    ctx.fillStyle = i % 2 === 1 ? "#5a0000" : "rgba(255,239,179,0.95)";
-    ctx.font =
-      "900 18px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans SC";
+// English looks better centered
+ctx.textAlign = "center";
+ctx.textBaseline = "middle";
 
-    const textR = radius * 0.86;
+// colors
+ctx.fillStyle = i % 2 === 1 ? "#5a0000" : "rgba(255,239,179,0.95)";
 
-    // 自动换行（简单版）
-    const label = PRIZES[i].name;
-    const maxLen = 18;
-    if (label.length > maxLen) {
-      const a = label.slice(0, maxLen);
-      const b = label.slice(maxLen);
-      ctx.fillText(a, textR, 6);
-      ctx.font =
-        "900 16px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans SC";
-      ctx.fillText(b, textR, 28);
+// Position: pull inward to avoid overflow
+const textR = radius * 0.62;
+
+// Max text width should depend on slice angle (approx chord length)
+const maxWidth = Math.min(
+  radius * 0.95,                 // hard cap
+  (radius * 0.85) * Math.sin(slice / 2) * 2 // chord length at this radius
+);
+
+// Word-wrap by measuring actual width
+function wrapLines(text, fontSize) {
+  ctx.font = `800 ${fontSize}px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial`;
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = "";
+
+  for (const w of words) {
+    const test = line ? `${line} ${w}` : w;
+    if (ctx.measureText(test).width <= maxWidth) {
+      line = test;
     } else {
-      ctx.fillText(label, textR, 12);
+      if (line) lines.push(line);
+      line = w;
     }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
 
-    ctx.restore();
+// Auto-shrink font if needed
+let fontSize = 18;
+let lines = wrapLines(PRIZES[i].name, fontSize);
+
+// If too many lines or still wide: shrink down
+while ((lines.length > 3) && fontSize > 14) {
+  fontSize -= 1;
+  lines = wrapLines(PRIZES[i].name, fontSize);
+}
+
+// If any line still exceeds maxWidth, shrink further
+function longestWidth(ls) {
+  return Math.max(...ls.map(l => ctx.measureText(l).width));
+}
+while (longestWidth(lines) > maxWidth && fontSize > 12) {
+  fontSize -= 1;
+  lines = wrapLines(PRIZES[i].name, fontSize);
+}
+
+// Render lines centered vertically
+const lineHeight = Math.round(fontSize * 1.15);
+const y0 = -((lines.length - 1) / 2) * lineHeight;
+
+for (let li = 0; li < lines.length; li++) {
+  ctx.fillText(lines[li], textR, y0 + li * lineHeight);
+}
+
+ctx.restore();
+
   }
 
   ctx.restore();
@@ -394,6 +438,12 @@ resetBtn.addEventListener("click", () => {
   }
   if (panelEl) panelEl.classList.remove("fx-on");
 });
+
+const DEV_MODE = false;
+
+if (!DEV_MODE) {
+  document.getElementById("resetBtn")?.remove();
+}
 
 // 初始化
 lockIfAlreadySpun();
