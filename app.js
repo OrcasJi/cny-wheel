@@ -439,7 +439,7 @@ resetBtn.addEventListener("click", () => {
   if (panelEl) panelEl.classList.remove("fx-on");
 });
 
-const DEV_MODE = false;
+const DEV_MODE = True;
 
 if (!DEV_MODE) {
   document.getElementById("resetBtn")?.remove();
