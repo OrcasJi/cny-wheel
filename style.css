@@ -170,13 +170,13 @@ h1{
   position:absolute;
   inset: 50%;
   transform: translate(-50%, -50%);
-  width: 92px;
-  height: 92px;
+  width: 78px;
+  height: 78px;
   border-radius: 50%;
   display:grid;
   place-items:center;
   font-weight:900;
-  font-size: 34px;
+  font-size: 30px;
   color:#7a0000;
   background: radial-gradient(circle at 30% 30%, var(--gold2) 0%, var(--gold) 70%, #d8b04f 100%);
   box-shadow:
@@ -361,14 +361,40 @@ h1{
 
 /* Small screens: hide lanterns */
 @media (max-width: 720px){
+  /* 1) 给标题区让位：整体下移一点，避免被灯笼压到 */
+  .top{
+    padding-top: 34px;   /* 原来是 10px 左右，这里加高 */
+  }
+
+  /* 2) 灯笼缩小 + 透明一点 + 往上放（别挡住标题） */
   .lantern{
-    width:52px;
-    height:76px;
-    top:80px;
+    display:block;
+    width:44px;
+    height:64px;
+    top: 10px;          /* ✅ 灯笼位置更靠上 */
+    opacity:.62;
+    filter: saturate(1.05);
     animation: lanternSwing 4.2s ease-in-out infinite;
   }
 
+  /* 3) 强制贴边，保证不会跑出屏幕/压中间 */
   .lantern-left{ left: 8px; }
   .lantern-right{ right: 8px; }
+
+  /* 4) 小屏再把 badge 稍微缩一下（更不挤） */
+  .badge{
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+
+  /* 5) 标题略微缩小（防止两行时更拥挤） */
+  h1{
+    font-size: clamp(22px, 7vw, 34px);
+  }
+
+  .sub{
+    font-size: 13px;
+    line-height: 1.35;
+  }
 }
 
