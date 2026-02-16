@@ -406,7 +406,7 @@ resetBtn?.addEventListener("click", () => {
 });
 
 // Hide reset in production
-const DEV_MODE = 1;
+const DEV_MODE = false;
 if (!DEV_MODE) document.getElementById("resetBtn")?.remove();
 
 // Init
