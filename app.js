@@ -12,12 +12,12 @@ const PRIZES = [
   {
     name: "One FREE soft drink",
     lines: ["One FREE", "soft", "drink"],
-    weight: 15,
+    weight: 10,
   },
   {
     name: "FREE CNY sweet rice cake",
     lines: ["FREE CNY", "sweet", "rice cake"],
-    weight: 60,
+    weight: 80,
   },
 ];
 
@@ -364,7 +364,7 @@ function onWin(winIndex) {
   saveSpinState({ prize, time, id, winIndex });
 
   showResult(prize, time, id);
-  
+
   // optional win glow if CSS has it
   if (panelEl) {
     panelEl.classList.add("win-glow");
@@ -406,7 +406,7 @@ resetBtn?.addEventListener("click", () => {
 });
 
 // Hide reset in production
-const DEV_MODE = false;
+const DEV_MODE = 1;
 if (!DEV_MODE) document.getElementById("resetBtn")?.remove();
 
 // Init
