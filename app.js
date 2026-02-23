@@ -7,17 +7,17 @@ const PRIZES = [
   {
     name: "One FREE Mango Pomelo Sago",
     lines: ["One FREE", "Mango", "Pomelo", "Sago"],
-    weight: 10,
+    weight: 33,
   },
   {
     name: "One FREE soft drink",
     lines: ["One FREE", "soft", "drink"],
-    weight: 10,
+    weight: 33,
   },
   {
     name: "FREE CNY sweet rice cake",
     lines: ["FREE CNY", "sweet", "rice cake"],
-    weight: 80,
+    weight: 33,
   },
 ];
 
