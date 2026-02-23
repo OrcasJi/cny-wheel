@@ -3,7 +3,7 @@
 A lightweight web-based lucky spin system built for a real Chinese restaurant during a Chinese New Year promotion.
 
 Customers scan a QR code, spin a festive wheel, and instantly receive prizes.
-The system was designed for real-world usage under live customer interaction.
+The system was deployed in a live restaurant environment and handled ~80–90 spins over a 3-day campaign without downtime.
 
 ## 📌 Overview
 
